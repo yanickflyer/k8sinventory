@@ -26,6 +26,13 @@ def get_pod_images(pod):
         images.extend([c.image for c in pod.spec.containers])
     return images
 
+def get_pod_containers(pod):
+    """Extract container names from a pod."""
+    containers = []
+    if pod.spec.containers:
+        containers.extend([(c.name, c.image) for c in pod.spec.containers])
+    return containers
+
 def get_pod_owners(pod):
     """
     Recursively traces the ownership chain to find the root controller.
@@ -71,7 +78,7 @@ try:
 except Exception as e:
     print(f"Error loading kube config: {e}")
 
-def get_report_minimal():
+def get_report(minimal=True):
     report = {}
     cluster_name = get_cluster_name()
     report['cluster_name'] = cluster_name
@@ -79,28 +86,41 @@ def get_report_minimal():
     load_report = []
     for pod in pods:
         owner_kind, owner_name, pod_images = get_pod_owners(pod)
-        pod_entry = {
-            "kind": owner_kind,
-            "name": owner_name,
-            "namespace": getattr(pod.metadata, "namespace", None),
-            "images": pod_images,
-        }
-        load_report.append(pod_entry)
+        containers = get_pod_containers(pod)
+        if not minimal:
+            for container in containers:
+                pod_entry = {
+                    "kind": owner_kind,
+                    "name": owner_name,
+                    "namespace": getattr(pod.metadata, "namespace", None),
+                    "Pod Name": getattr(pod.metadata, "name", None),
+                    "images": container[1],
+                    "container": container[0],
+                }
+                load_report.append(pod_entry)
+        else:
+            pod_entry = {
+                "kind": owner_kind,
+                "name": owner_name,
+                "namespace": getattr(pod.metadata, "namespace", None),
+                "images": pod_images,
+            }
+            load_report.append(pod_entry)
 
-    # De-duplicate entries (preserve order)
-    seen = set()
-    unique = []
-    for item in load_report:
-        key = (
-            item.get("kind"),
-            item.get("name"),
-            item.get("namespace"),
-            tuple(item.get("images") or []),
-        )
-        if key not in seen:
-            seen.add(key)
-            unique.append(item)
-    load_report = unique
+            # De-duplicate entries (preserve order)
+            seen = set()
+            unique = []
+            for item in load_report:
+                key = (
+                    item.get("kind"),
+                    item.get("name"),
+                    item.get("namespace"),
+                    tuple(item.get("images") or []),
+                )
+                if key not in seen:
+                    seen.add(key)
+                    unique.append(item)
+            load_report = unique
 
     report['workloads'] = load_report
     return report
