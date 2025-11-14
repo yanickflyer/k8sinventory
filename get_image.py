@@ -70,9 +70,14 @@ def get_aks_image():
         v1 = client.CoreV1Api()
         pods = v1.list_pod_for_all_namespaces(watch=False)
 
-        # Structure: { kind: { Name: { Namespace: { images: [...], pods: [...] } } } }
-        grouped = {}
+        # Get cluster name using Kubernetes API
+        cluster_info = config.list_kube_config_contexts()
+        cluster_name = cluster_info[1].get("name", "default_cluster_name")
 
+        # Structure: { "cluster_name": "<cluster_name>", <kind>: { <Name>: { Namespace: <ns>, images: [...], pods: [...] } } }
+        grouped = {"cluster_name": cluster_name}
+
+        
         for pod in pods.items:
             owner_kind, owner_name = get_pod_owners(pod)
             owner_name = owner_name or "Unknown"
