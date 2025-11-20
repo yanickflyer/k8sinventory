@@ -1,4 +1,4 @@
-import workloads, csv
+import inventory, csv
 from rich.progress import Progress
 
 def get_report(filepath):
@@ -12,25 +12,24 @@ def get_report(filepath):
         task6 = p.add_task("Retrieving Pods...", total=1000)
         full_report = []
         while not p.finished:
-            print("Generating Report")
-            full_report = workloads.get_deployments()
+            full_report = inventory.get_deployments()
             p.update(task1, advance=1000)
-            full_report.extend(workloads.get_statefulsets())
+            full_report.extend(inventory.get_statefulsets())
             p.update(task2, advance=1000)
-            full_report.extend(workloads.get_daemonsets())
+            full_report.extend(inventory.get_daemonsets())
             p.update(task3, advance=1000)
-            full_report.extend(workloads.get_jobs())
+            full_report.extend(inventory.get_jobs())
             p.update(task4, advance=1000)
-            full_report.extend(workloads.get_cronjobs())
+            full_report.extend(inventory.get_cronjobs())
             p.update(task5, advance=1000)
-            full_report.extend(workloads.get_pods())
+            full_report.extend(inventory.get_pods())
             p.update(task6, advance=1000)
             p.stop()
     export_csv(full_report,filepath)
     return
     
 def export_csv(report,filepath):
-    cluster_name = workloads.get_cluster_name()
+    cluster_name = inventory.get_cluster_name()
     filename = f"{cluster_name}_workload_report.csv" if not filepath else f"{filepath}/{cluster_name}_workload_report.csv"
     print(f"Exporting report to {filename}...")
     try:

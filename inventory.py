@@ -97,7 +97,6 @@ def get_cronjobs():
     cronjobs_list = []
     try:
         cronjobs = v1.list_cron_job_for_all_namespaces()
-        # print(cronjobs.items)
         cronjobs_list = make_cronjob_list(cronjobs.items)
     except ApiException as e:
         print(f"Exception when calling BatchV1beta1Api->list_cron_job_for_all_namespaces: {e}")
