@@ -1,5 +1,4 @@
 import minimal, argparse
-import sys
 
 def main():
     parser = argparse.ArgumentParser(description="Generate Kubernetes Inventory Report", add_help=True)
