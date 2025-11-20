@@ -1,4 +1,4 @@
-import generate_inventory
+import generate_inventory, new
 from export_csv import export_csv
 import json
 import sys
@@ -15,3 +15,5 @@ elif "--minimal" in sys.argv:
     cluster_name = final_report['cluster_name'] if final_report else 'default_cluster_name'
     print(json.dumps(final_report))
     export_csv(final_report, cluster_name, minimal=True)
+elif "--new" in sys.argv:
+    final_report = new.get_report()

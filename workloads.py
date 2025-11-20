@@ -11,8 +11,8 @@ except Exception as e:
 def make_list(workload, kind):
     workload_list = []
     for workload in workload:
-        if workload.metadata.owner_references:
-            continue
+        # if workload.metadata.owner_references:
+        #     continue
         workload_list.append({
             "namespace": workload.metadata.namespace,
             "kind": kind,
@@ -23,7 +23,8 @@ def make_list(workload, kind):
         })
     return workload_list
 
-def make_list(workload, kind="CronJob"):
+def make_cronjob_list(workload):
+    kind="CronJob"
     workload_list = []
     for workload in workload:
         if workload.metadata.owner_references:
@@ -86,7 +87,7 @@ def get_jobs():
     jobs_list = []
     try:
         jobs = v1.list_job_for_all_namespaces()
-        jobs_list = make_list(jobs.items, "Job")
+        jobs_list = make_cronjob_list(jobs.items, "Job")
     except ApiException as e:
         print(f"Exception when calling BatchV1Api->list_job_for_all_namespaces: {e}")
         return []
@@ -98,8 +99,31 @@ def get_cronjobs():
     try:
         cronjobs = v1.list_cron_job_for_all_namespaces()
         # print(cronjobs.items)
-        cronjobs_list = make_list(cronjobs.items, "CronJob")
+        cronjobs_list = make_list(cronjobs.items)
     except ApiException as e:
         print(f"Exception when calling BatchV1beta1Api->list_cron_job_for_all_namespaces: {e}")
         return []
     return cronjobs_list
+
+def get_pods():
+    v1 = client.CoreV1Api()
+    try:
+        pods = v1.list_pod_for_all_namespaces(watch=False)
+        pods_list = []
+        for pod in pods.items:
+            owner_references = getattr(pod.metadata, "owner_references", [])
+            if not owner_references:
+                pods_list.append({
+                    "namespace": pod.metadata.namespace,
+                    "kind": "Pod",
+                    "name": pod.metadata.name,
+                    "images": [
+                        container.image for container in pod.spec.containers
+                    ]
+                })
+        return pods_list
+    except ApiException as e:
+        print(f"Error fetching pods: {e}")
+        return []
+
+print(get_pods())
