@@ -4,15 +4,14 @@ from kubernetes.client.rest import ApiException
 
 try:
     config.load_kube_config()
-    print("Kube config loaded successfully.")
 except Exception as e:
     print(f"Error loading kube config: {e}")
 
 def make_list(workload, kind):
     workload_list = []
     for workload in workload:
-        # if workload.metadata.owner_references:
-        #     continue
+        if workload.metadata.owner_references:
+            continue
         workload_list.append({
             "namespace": workload.metadata.namespace,
             "kind": kind,
@@ -87,7 +86,7 @@ def get_jobs():
     jobs_list = []
     try:
         jobs = v1.list_job_for_all_namespaces()
-        jobs_list = make_cronjob_list(jobs.items, "Job")
+        jobs_list = make_list(jobs.items, "Job")
     except ApiException as e:
         print(f"Exception when calling BatchV1Api->list_job_for_all_namespaces: {e}")
         return []
@@ -99,7 +98,7 @@ def get_cronjobs():
     try:
         cronjobs = v1.list_cron_job_for_all_namespaces()
         # print(cronjobs.items)
-        cronjobs_list = make_list(cronjobs.items)
+        cronjobs_list = make_cronjob_list(cronjobs.items)
     except ApiException as e:
         print(f"Exception when calling BatchV1beta1Api->list_cron_job_for_all_namespaces: {e}")
         return []
@@ -126,4 +125,10 @@ def get_pods():
         print(f"Error fetching pods: {e}")
         return []
 
-print(get_pods())
+def get_cluster_name():
+    try:
+        cluster_info = config.list_kube_config_contexts()
+        return cluster_info[1].get("name", "default_cluster_name")
+    except Exception as e:
+        print(f"Error fetching cluster name: {e}")
+        return "default_cluster_name"
