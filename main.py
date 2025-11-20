@@ -1,5 +1,4 @@
 import generate_inventory
-from get_image import get_aks_image
 from export_csv import export_csv
 import json
 import sys
