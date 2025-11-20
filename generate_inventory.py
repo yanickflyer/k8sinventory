@@ -1,6 +1,5 @@
 from kubernetes import client, config
 from kubernetes.client.rest import ApiException
-import json
 
 def get_pods():
     try:
