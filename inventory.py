@@ -43,10 +43,11 @@ def get_replica_set():
     replica_sets_list = []
     try:
         replica_sets = v1.list_replica_set_for_all_namespaces()
-        replica_sets = make_list(replica_sets.items, "ReplicaSet")
+        replica_sets_list = make_list(replica_sets.items, "ReplicaSet")
     except ApiException as e:
         print(f"Exception when calling AppsV1Api->list_replica_set_for_all_namespaces: {e}")
         return []
+    return replica_sets_list
     
 def get_deployments():
     v1 = client.AppsV1Api()
