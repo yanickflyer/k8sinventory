@@ -104,10 +104,12 @@ def get_cronjobs():
         return []
     return cronjobs_list
 
-def get_pods():
+def get_pods(*args):
     v1 = client.CoreV1Api()
     try:
         pods = v1.list_pod_for_all_namespaces(watch=False)
+        if args:
+            return pods.items
         pods_list = []
         for pod in pods.items:
             owner_references = getattr(pod.metadata, "owner_references", [])
