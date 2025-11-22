@@ -26,5 +26,4 @@ def get_report(filepath):
             full_report.extend(inventory.get_pods())
             p.update(task6, advance=1000)
             p.stop()
-    export_csv(full_report,filepath)
-    return
+    export_csv(full_report=full_report,filepath=filepath)

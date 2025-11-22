@@ -22,8 +22,7 @@ def main():
     elif args.full:
         print("Generating Full Workload report...")
         filepath = args.csv_filepath if args.csv_filepath else None
-        final_report = fullworkload.get_report(filepath)
-        print(final_report)
+        fullworkload.get_report(filepath)
         # export_csv(final_report, cluster_name, minimal=False)
 
 if __name__ == "__main__":

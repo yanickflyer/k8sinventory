@@ -28,6 +28,7 @@ def get_report(filepath):
             # Process each pod here if needed
             p.update(task2, advance=1)
         p.stop()
+        export_csv(full = True, filepath=filepath, full_report=pod_list)
     return pod_list
 
 def get_mainowner(pod):
@@ -39,13 +40,9 @@ def get_mainowner(pod):
         if owner_references.kind == "ReplicaSet":
             name = owner_references.name if hasattr(owner_references, 'name') else None
             main_owner = owner.get_replica_set_owner(name, pod.metadata.namespace)
-            if main_owner == None:
-                return owner_references
             return main_owner
         elif owner_references.kind == "Job":
             name = owner_references.name if hasattr(owner_references, 'name') else None
             main_owner = owner.get_job_owner(name, pod.metadata.namespace)
-            if main_owner == None:
-                return owner_references
             return main_owner
     return owner_references.name, owner_references.kind
